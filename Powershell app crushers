@@ -1,0 +1,7 @@
+####### Force quit apps
+##### Example ##### Stop-Process -Name 'adobe*' -Force ####
+
+
+Get-Process | Format-Table
+Start-Sleep -5
+Stop-Process -Name 'Type Process Name here' -Force
