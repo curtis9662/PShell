@@ -5,3 +5,12 @@
 Get-Process | Format-Table
 Start-Sleep -5
 Stop-Process -Name 'Type Process Name here' -Force
+
+
+#############################Kill a specific application by its process ID:#########################################
+Stop-Process -Id 1234 -Force
+##############################Replace 1234 with the actual process ID. ############
+
+################################## Kill all instances of a specific application:#################################################
+##Remember to input the actual process names#####################
+Get-Process -Name 'processname' | Stop-Process -Force 
