@@ -1,0 +1,18 @@
+# 2. Get a List of All Domain Users:
+Get-ADUser -Filter * | Select-Object Name, DistinguishedName, UserPrincipalName, WhenCreated, LastLogonDate
+Start-Sleep 5
+Write-Host "Curtis Jones Cyber Security Engineer"
+Start-Sleep 2
+# 3. Get a List of All Domain Computers:
+Get-ADComputer -Filter * | Select-Object Name, DistinguishedName, DNSHostName, LastLogonDate
+Start-Sleep 5
+# 4. Get a List of All Domain Groups:
+Get-ADGroup -Filter * | Select-Object Name, GroupCategory, GroupScope, DistinguishedName, Members
+Start-Sleep 5
+# 5. List All Group Memberships for a Specific User:
+# Replace "username" with name or SAM Get-ADPrincipalGroupMembership -Identity <UserName> | Select-Object Name, DistinguishedName
+# 7. Check for Stale User Accounts:
+#Update params as needed days Object, etc $DaysInactive = 90
+$CurrentDate = Get-Date
+$InactiveDate = $CurrentDate.AddDays(-$DaysInactive)
+Get-ADUser -Filter {LastLogonDate -lt $InactiveDate} | Select-Object Name, DistinguishedName, LastLogonDate
