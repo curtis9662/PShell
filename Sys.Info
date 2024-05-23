@@ -1,0 +1,38 @@
+# Define the interval (in secs) between iterations
+$interval = 35
+
+while ($true) {
+    Write-Host "Gathering sys.info ... Just Wait"
+
+    $cpuUsage = Get-WmiObject Win32_Processor | Measure-Object -Property LoadPercentage -Average | Select-Object -ExpandProperty Average
+    $memoryUsage = Get-WmiObject Win32_OperatingSystem | Select-Object TotalVisibleMemorySize, FreePhysicalMemory
+    $totalMemory = $memoryUsage.TotalVisibleMemorySize / 1MB
+    $freeMemory = $memoryUsage.FreePhysicalMemory / 1MB
+    $usedMemory = $totalMemory - $freeMemory
+
+    
+    $loggedOnUsers = Get-WmiObject -Class Win32_ComputerSystem | Select-Object -ExpandProperty UserName
+
+    Show-EventLog
+    $netstatInfo = netstat -n | Select-String "ESTABLISHED"
+
+    #system uptime
+    $uptime = (Get-Date) - (gcim Win32_OperatingSystem).LastBootUpTime
+Show-NetFirewallRule
+    Get-Time
+    Write-Host "CPU Usage: $cpuUsage%" -ForegroundColor Yellow
+    Write-Host "Total Memory: $totalMemory MB" -ForegroundColor Green
+    Write-Host "Used Memory: $usedMemory MB" -ForegroundColor Green
+    
+    Write-Host "Logged-on Users:" -ForegroundColor Cyan
+    Write-Host $loggedOnUsers -ForegroundColor Cyan
+    
+    Write-Host "IP Addresses being accessed:" -ForegroundColor Magenta
+    $netstatInfo | ForEach-Object { Write-Host $_ -ForegroundColor Magenta }
+    
+    Write-Host "System Uptime: $($uptime.Days) days $($uptime.Hours) hours $($uptime.Minutes) minutes $($uptime.Seconds) seconds" -ForegroundColor Blue
+Write-Host "By CJONES, Now Close the Event Vwr & Review Those Logs 🐕‍🦺"
+
+    # Wait for the next iteration
+    Start-Sleep -Seconds $interval
+}
