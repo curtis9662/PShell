@@ -1,0 +1,30 @@
+$interval = 30
+
+while ($true) {
+    Write-Host "Gathering IAM settings information..."
+
+    #local user.accts
+    $localUsers = Get-LocalUser | Select-Object Name, Enabled, LastLogon
+
+    #group.memberships
+    $userGroups = Get-LocalGroup | ForEach-Object {
+        $group = $_
+        Get-LocalGroupMember -Group $group | Select-Object @{Name="GroupName";Expression={$group.Name}}, Name, PrincipalSource
+    }
+
+    #pw policy settings
+    $passwordPolicy = Get-ADDefaultDomainPasswordPolicy | Select-Object -Property MinPasswordLength, LockoutDuration, LockoutObservationWindow, MaxPasswordAge, MinPasswordAge, PasswordHistoryCount, PasswordComplexityEnabled, ReversibleEncryptionEnabled
+
+    # Output the gathered information
+    Write-Host "Local User Accounts:" -ForegroundColor Cyan
+    $localUsers | ForEach-Object { Write-Host $_ }
+
+    Write-Host "Group Memberships:" -ForegroundColor Magenta
+    $userGroups | ForEach-Object { Write-Host "User: $($_.Name) - Group: $($_.GroupName) - Source: $($_.PrincipalSource)" }
+
+    Write-Host "Password Policy Settings:" -ForegroundColor Yellow
+    $passwordPolicy | ForEach-Object { Write-Host $_ }
+
+    # Wait for the specified interval before the next iteration
+    Start-Sleep -Seconds $interval
+}
