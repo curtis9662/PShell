@@ -1,0 +1,58 @@
+﻿Start-Sleep 5
+
+   while ($true) {
+    Get-Command
+
+   Systeminfo
+   Write-Host "Curtis Dev'd it" -Foregroundcolor magenta
+   Write-Host "...........................3"
+   Start-Sleep 1
+   Write-Host "...........................2"
+   Start-Sleep 1
+   Write-Host "...........................1"
+   Start-Sleep 2
+   Start-Process services.msc
+   Write-Host "Almost Done..." -Foregroundcolor cyan
+   Write-Host "...........................3" -Foregroundcolor Magenta
+   Start-Sleep 1
+   Write-Host "...........................2" -ForegroundColor white
+   Start-Sleep 1
+   Write-Host "...........................1" -ForegroundColor DarkGreen
+   Start-Sleep 1
+   Write-Host "Take 1 Last look maybe Ctrl+C & Ctrl+V" -ForegroundColor DarkYellow
+   Start-Sleep 7
+   Write-Host "...........................3" -Foregroundcolor Magenta
+   Start-Sleep 1
+   Write-Host "...........................2" -ForegroundColor white
+   Start-Sleep 1
+   Write-Host "...........................1" -ForegroundColor DarkGreen
+   
+   Start-Sleep 10
+   #Displays All Commands available for your $PSSVersion
+   $PSVersionTable
+   $PSVersionTable.PSVersion
+   
+   Write-Host "Clearing data in 8" -ForegroundColor Magenta
+   
+   Start-Sleep 1
+   Write-Host "7" -ForegroundColor white
+   Start-Sleep 1
+   Write-Host "6" -ForegroundColor white
+   Start-Sleep 1
+   Write-Host "5" -ForegroundColor white
+   Start-Sleep 1
+   Write-Host "4" -ForegroundColor white
+   Start-Sleep 1
+   Write-Host "3" -ForegroundColor Red
+   Start-Sleep 1
+   Write-Host "2" -ForegroundColor Red
+   Start-Sleep 1
+   Write-Host "1" -ForegroundColor Red
+   Start-Sleep 1
+   cls
+   
+   
+   
+   Write-Host "Bye Bye \/" -ForegroundColor Green
+   Start-Sleep 3
+   }
