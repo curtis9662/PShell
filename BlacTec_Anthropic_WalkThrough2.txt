@@ -1,3 +1,4 @@
+#Update line 43 with your api key from https://console.anthropic.com/settings/keys
 #Just ctrl+A this entire code block
 # Ensure you're running PowerShell 5.1 or later
    $PSVersionTable.PSVersion
@@ -39,7 +40,7 @@ Start-Sleep 6
    Register-SecretVault -Name AnthropicVault -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault
 
    # Store your Anthropic API key securely
-   $apiKey = Read-Host "ENTER_YOU_ANTHROPIC_API_KEY" -AsSecureString
+   $apiKey = Read-Host "ENTER_YOUR_ANTHROPIC_API_KEY" -AsSecureString
    Set-Secret -Name AnthropicApiKey -SecureStringSecret $apiKey -Vault AnthropicVault
    
    
