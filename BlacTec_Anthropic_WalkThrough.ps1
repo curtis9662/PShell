@@ -1,0 +1,109 @@
+# Ensure you're running PowerShell 5.1 or later
+   $PSVersionTable.PSVersion
+
+   # If needed, update PowerShell:
+   # Visit https://github.com/PowerShell/PowerShell/releases and download the latest stable version
+
+   # Install or update NuGet (package provider for PowerShell)
+   Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
+
+   # Install or update PowerShellGet (PowerShell module for managing packages)
+   Install-Module -Name PowerShellGet -Force -AllowClobber -Scope CurrentUser
+
+   # Install the required modules
+   Install-Module -Name Microsoft.PowerShell.SecretManagement -Scope CurrentUser
+   Install-Module -Name Microsoft.PowerShell.SecretStore -Scope CurrentUser
+   #######
+   write-host "Developed By BlacTec, 0700 07192024" -foregroundcolor blue
+
+Start-Sleep  5
+write-host "Developed By BlacTec, 0700 07192024" -foregroundcolor Yellow
+Start-Sleep  4
+write-host "Developed By BlacTec, 0700 07192024" -foregroundcolor Green
+Start-Sleep  3
+write-host "Developed By BlacTec, 0700 07192024" -foregroundcolor Red
+Start-Sleep  2
+write-host "Developed By BlacTec, 0700 07192024" -foregroundcolor White
+Start-Sleep  1
+write-host "Developed By BlacTec, 0700 07192024" -foregroundcolor cyan
+Start-Sleep  0
+write-host "Developed By BlacTec, _____________________________________________________________________________________________________________________________________________________________" -foregroundcolor Green
+Start-Sleep  1
+write-host "Developed By BlacTec, _____________________________________________________________________________________________________________________________________________________________" -foregroundcolor Green
+Start-Sleep  1
+write-host "Developed By BlacTec, _____________________________________________________________________________________________________________________________________________________________" -foregroundcolor Green
+write-host "Developed By BlacTec, Restarting" -foregroundcolor Green
+Start-Sleep 6
+# Initialize the SecretStore vault
+   Register-SecretVault -Name AnthropicVault -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault
+
+   # Store your Anthropic API key securely
+   $apiKey = Read-Host "ENTER_YOU_ANTHROPIC_API_KEY" -AsSecureString
+   Set-Secret -Name AnthropicApiKey -SecureStringSecret $apiKey -Vault AnthropicVault
+   
+   
+  #######
+  
+  function Invoke-AnthropicAPI {
+       param (
+           [Parameter(Mandatory=$true)]
+           [string]$Prompt,
+           
+           [Parameter(Mandatory=$false)]
+           [string]$Model = "claude-3-sonnet-20240229",
+           
+           [Parameter(Mandatory=$false)]
+           [int]$MaxTokens = 1000
+       )
+
+       $apiKey = Get-Secret -Name AnthropicApiKey -AsPlainText -Vault AnthropicVault
+
+       $headers = @{
+           "Content-Type" = "application/json"
+           "x-api-key" = $apiKey
+           "anthropic-version" = "2023-06-01"
+       }
+
+       $body = @{
+           "model" = $Model
+           "max_tokens_to_sample" = $MaxTokens
+           "prompt" = $Prompt
+       } | ConvertTo-Json
+       $response = Invoke-RestMethod -Uri "https://api.anthropic.com/v1/complete" -Method Post -Headers $headers -Body $body
+
+       return $response.completion
+   }
+
+####### Update API credits
+
+   $prompt = "Human: What is the capital of France?
+
+   Assistant:"
+
+   $response = Invoke-AnthropicAPI -Prompt $prompt
+
+   Write-Output $response
+   
+   ####### Start My Interaction:
+   
+   function Start-ClaudeChat {
+       $conversation = "Human: Hello, Claude. Let's have a conversation.
+
+   BlacTec_Ai-BOT: Hello! Let's Collab! What would you like to talk about?"
+
+       while ($true) {
+           $userInput = Read-Host "You (Input Inquiry)"
+           if ($userInput -eq "exit") { break }
+
+           $conversation += "`n`nHuman: $userInput`n`nAssistant:"
+
+           $response = Invoke-AnthropicAPI -Prompt $conversation -MaxTokens 5000
+
+           Write-Output "Claude: $response"
+
+           $conversation += $response
+       }
+   }
+
+   # Start the interactive chat
+   Start-ClaudeChat
