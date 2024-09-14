@@ -1,3 +1,4 @@
+#Just ctrl+A this entire code block
 # Ensure you're running PowerShell 5.1 or later
    $PSVersionTable.PSVersion
 
