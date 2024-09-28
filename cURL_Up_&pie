@@ -1,0 +1,24 @@
+####################################################################################
+####################################################################################
+####################################################################################
+###BLacTEC Top 10 curl (Invoke-WR) cmd pshell:
+# 1. Send a POST request with JSON data and custom headers
+Write-Host "CJONES DEV'd it"
+Invoke-WebRequest -Uri "https://api.example.com/data" -Method Post -Body ($data | ConvertTo-Json) -ContentType "application/json" -Headers @{"Authorization"="Bearer $token"; "X-Custom-Header"="Value"}
+Write-Host "CJONES DEV'd it"
+# 2. Download a file with progress bar
+Invoke-WebRequest -Uri "https://example.com/large-file.zip" -OutFile "large-file.zip" -UseBasicParsing | ForEach-Object { Write-Progress -Activity "Downloading" -PercentComplete $_.DownloadProgressPercentage }
+Write-Host "CJONES DEV'd it"
+# 3. Perform a multi-part form data upload
+$form = @{
+    file = Get-Item -Path ".\document.pdf"
+    field1 = "value1"
+    field2 = "value2"
+}
+Write-Host "CJONES DEV'd it" ## I also like the "Write-Progress" cmd
+Get-Help Write-host -Online
+start-sleep 20
+Invoke-WebRequest -Uri "https://api.example.com/upload" -Method Post -Form $form
+####################################################################################
+####################################################################################
+####################################################################################
