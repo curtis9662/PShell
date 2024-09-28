@@ -1,0 +1,30 @@
+####################################################################################
+####################################################################################
+####################################################################################
+# 9. Parse and extract data from HTML response
+$response = Invoke-WebRequest -Uri "https://example.com"
+$targetDivs = $response.ParsedHtml.getElementsByTagName("div") | Where-Object { $_.className -eq "target-class" }
+$extractedData = $targetDivs | ForEach-Object { $_.innerText }
+Write-Host "CJONES DEV'd it"
+# 10. Implement OAuth 2.0 authentication flow
+$authUrl = "https://auth.example.com/oauth2/authorize"
+$tokenUrl = "https://auth.example.com/oauth2/token"
+$clientId = "your-client-id"
+$clientSecret = "your-client-secret"
+$redirectUri = "http://localhost:8080/callback"
+Write-Host "CJONES DEV'd it"
+$authCode = Invoke-WebRequest -Uri "$authUrl?client_id=$clientId&response_type=code&redirect_uri=$redirectUri" -SessionVariable 'session'
+$code = $authCode.InputFields | Where-Object { $_.name -eq "code" } | Select-Object -ExpandProperty value
+
+$tokenResponse = Invoke-WebRequest -Uri $tokenUrl -Method Post -Body @{
+    grant_type = "authorization_code"
+    code = $code
+    redirect_uri = $redirectUri
+    client_id = $clientId
+    client_secret = $clientSecret
+} -UseBasicParsing
+
+$accessToken = ($tokenResponse.Content | ConvertFrom-Json).access_token
+####################################################################################
+####################################################################################
+####################################################################################
