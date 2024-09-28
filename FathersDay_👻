@@ -1,0 +1,21 @@
+# 7. Use a proxy server with authentication
+$proxy = New-Object System.Net.WebProxy("http://proxy.example.com:8080")
+$proxy.Credentials = New-Object System.Net.NetworkCredential("username", "password")
+Invoke-WebRequest -Uri "https://api.example.com" -Proxy $proxy -ProxyUseDefaultCredentials
+
+# 8. Implement retry logic with exponential backoff
+$maxRetries = 5
+$retryCount = 0
+$delay = 1
+do {
+    try {
+        $response = Invoke-WebRequest -Uri "https://api.example.com" -UseBasicParsing
+        break
+    } catch {
+        $retryCount++
+        if ($retryCount -eq $maxRetries) { throw }
+        Start-Sleep -Seconds $delay
+        $delay *= 2
+    }
+} while ($retryCount -lt $maxRetries)
+Write-Host "CJONES DEV'd it"
