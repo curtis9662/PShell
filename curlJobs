@@ -1,0 +1,22 @@
+# 4. Execute a complex query with URL-encoded parameters
+Write-Host "CJONES DEV'd it"
+$params = @{
+    param1 = [System.Web.HttpUtility]::UrlEncode("Complex & Value")
+    param2 = [System.Web.HttpUtility]::UrlEncode("Another Complex ? Value")
+}
+$url = "https://api.example.com/search?" + ($params.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join "&"
+Invoke-WebRequest -Uri $url -UseBasicParsing
+Write-Host "CJONES DEV'd it"
+# 5. Handle redirects manually
+$response = Invoke-WebRequest -Uri "https://example.com" -MaximumRedirection 0 -ErrorAction SilentlyContinue
+if ($response.StatusCode -ge 300 -and $response.StatusCode -lt 400) {
+    $redirectUrl = $response.Headers.Location
+    Invoke-WebRequest -Uri $redirectUrl -UseBasicParsing
+}
+
+# 6. Perform concurrent requests using jobs
+Write-Host "CJONES DEV'd it"
+$urls = @("https://api1.example.com", "https://api2.example.com", "https://api3.example.com")
+$jobs = $urls | ForEach-Object { Start-Job -ScriptBlock { param($url) Invoke-WebRequest -Uri $url -UseBasicParsing } -ArgumentList $_ }
+$results = $jobs | Wait-Job | Receive-Job
+
