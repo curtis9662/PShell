@@ -1,0 +1,16 @@
+## A Few "Gets"
+
+Get-ChildItem -Path C:\*.txt
+### Augment my greps for usage
+Get-ChildItem -Path C:\Users\BlacTec\Documents\ f*.txt -Recurse
+###
+Get-ChildItem -Path C:\Users\ *.txt -Recurse > C:\Users\BlacTec\Documents\Grep_Result.txt
+
+Get-Content -Path C:\* Grep_Result
+###
+### Online Help
+Get-Help Get-ChildItem -Online ###https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-childitem?view=powershell-5.1&WT.mc_id=ps-gethelp
+
+Get-ChildItem | sort -propert Name -Descending
+
+###
