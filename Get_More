@@ -1,0 +1,6 @@
+##C:\> 
+$total = 0
+Get-ChildItem | ForEach-Object {$total += $_.length }
+$total
+### Find processes with LARGEST working set size
+Get-Process | sort -Descending ws | select -First 17
