@@ -1,0 +1,5 @@
+$PSVersionTable.PSVersion
+winget install --id Microsoft.Powershell --source winget
+Invoke-Expression "& { $(irm https://aka.ms/install-powershell.ps1) } -UseMSI"
+Get-WinEvent | Format-Table TimeCreated, Id, Message -AutoSize -Force
+
