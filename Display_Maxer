@@ -1,0 +1,90 @@
+#Persistent Display
+
+cd..
+# Window Toggler PowerShell Script
+# This script maximizes all windows, waits a lil bit, then minimizes all wins,
+# repeating until the script is Ctrl+C
+
+# Func to max all wins
+Get-Date
+Start-Sleep 5
+function Maximize-AllWindows {
+    Write-Host "Max all my windows..." -ForegroundColor Cyan
+    
+    Add-Type @"
+    using System;
+    using System.Runtime.InteropServices;
+    
+    public class WindowTools {
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+        
+        [DllImport("user32.dll")]
+        public static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+        
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hWnd);
+        
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetShellWindow();
+        
+        public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+        
+        public const int SW_MAXIMIZE = 3;
+    }
+"@
+    
+    $shellWindow = [WindowTools]::GetShellWindow()
+    
+    $windows = New-Object System.Collections.ArrayList
+    
+    $enumWindowsCallback = [WindowTools+EnumWindowsProc] {
+        param([IntPtr]$hWnd, [IntPtr]$lParam)
+        
+        if ($hWnd -ne $shellWindow -and [WindowTools]::IsWindowVisible($hWnd)) {
+            [void]$windows.Add($hWnd)
+        }
+        
+        return $true
+    }
+    
+    [void][WindowTools]::EnumWindows($enumWindowsCallback, [IntPtr]::Zero)
+    
+    foreach ($window in $windows) {
+        [void][WindowTools]::ShowWindowAsync($window, [WindowTools]::SW_MAXIMIZE)
+    }
+}
+
+# Minimize all wins
+function Minimize-AllWindows {
+    Write-Host "All windows poof..." -ForegroundColor Yellow
+    
+    # Create a shell application object
+    $shell = New-Object -ComObject "Shell.Application"
+    # Minimize all windows
+    $shell.MinimizeAll()
+}
+
+Write-Host "Window toggle script started. Press Ctrl+C to exit." -ForegroundColor Green
+
+try {
+    while ($true) {
+        # Maximize all windows
+        Maximize-AllWindows
+        
+        # Wait a min
+        Write-Host "Wait a min ..." -ForegroundColor White
+        Start-Sleep -Seconds 59
+        
+        Minimize-AllWindows
+        
+        #
+        Write-Host "Waiting 60 seconds before maximizing..." -ForegroundColor Cyan
+        Start-Sleep -Seconds 59
+    }
+} catch {
+    Write-Host "`nScript interrupted. Exiting..." -ForegroundColor Red
+} finally {
+    # Clean up
+    [System.GC]::Collect()
+}
