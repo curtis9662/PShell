@@ -1,20 +1,29 @@
-**1. Enumerate all registry Run/RunOnce persistence keys*
+##1. Enumerate all registry Run/RunOnce persistence keys*
 gci HKLM:\Software\Microsoft\Windows\CurrentVersion\Run*, HKCU:\Software\Microsoft\Windows\CurrentVersion\Run*
-**2. List executables in user profile AppData (common malware staging)**
+Start-Sleep -10
+##2. List executables in user profile AppData (common malware staging)##
 gci "$env:USERPROFILE\AppData" -Recurse -Include *.exe,*.dll -ErrorAction SilentlyContinue
-**3. Identify recently created files in system32 (potential DLL drop-ins)**
+Start-Sleep -10
+##3. Identify recently created files in system32 (potential DLL drop-ins)##
 gci $env:WINDIR\System32 | where {$_.CreationTime -gt (Get-Date).AddDays(-7)}
-**4. Find unsigned executables outside normal program paths**
+Start-Sleep -10
+##4. Find unsigned executables outside normal program paths##
 gci C:\ -Recurse -Include *.exe | where {!($_.VersionInfo.SignatureStatus)}
-**5. Search for hidden files or directories across all fixed drives**
+Start-Sleep -10
+##5. Search for hidden files or directories across all fixed drives##
 gci C:\ -Recurse -Force | where {$_.Attributes -match "Hidden"}
-**6. Identify odd script files in startup folders**
+Start-Sleep -10
+##6. Identify odd script files in startup folders##
 gci "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup" -Include *.ps1,*.vbs,*.js
-**7. Detect possible LOLBins via unexpected system-tool locations**
+Start-Sleep -10
+##7. Detect possible LOLBins via unexpected system-tool locations##
 gci C:\ -Recurse -Include bitsadmin.exe, certutil.exe, mshta.exe
-**8. Locate files with ADS (Alternate Data Streams)**
+Start-Sleep -10
+##8. Locate files with ADS (Alternate Data Streams)##
 gci C:\ -Recurse -Stream * -ErrorAction SilentlyContinue
-**9. Enumerate scheduled task payload paths**
+Start-Sleep -10
+##9. Enumerate scheduled task payload paths##
 gci "C:\Windows\System32\Tasks" -Recurse
-**10. Discover EXEs in temp directories (malware deployment hotspots)**
+Start-Sleep -10
+##10. Discover EXEs in temp directories (malware deployment hotspots)##
 gci "$env:TEMP","C:\Windows\Temp" -Recurse -Include *.exe
