@@ -1,55 +1,75 @@
-Here is a step/step workflow to get Checkmarx scanning running.
+# 🛡️ Enterprise Runbook: Checkmarx Integration & Migration
 
-1. Prerequisites and Authentication
-Before hitting the API, you need to ensure you have the proper credentials and the target project exists in Checkmarx.
+**Objective:** Automate security scanning for the GitHub codebase using Checkmarx (CxSAST/CxOne) API.  
+**Scope:** Migration validation, API integration, and GitHub Actions workflow.
 
-Generate an API Key: Log into your Checkmarx instance and generate an OAuth2 Refresh Token or an API Key.
+---
 
-Identify Project ID: If you are migrating a codebase, you’ll need the projectID. You can find this via the UI or by calling the /projects endpoint.
+## 1. Prerequisites & Authentication
+**Critical:** Ensure all credentials are validated before attempting API calls.
 
-2. The API Workflow Steps
-To scan your GitHub code, the API typically follows this sequence:
+* **Access Control:** Verify the target project exists in the Checkmarx instance.
+* **API Key Generation:**
+    * Log into the Checkmarx User Interface.
+    * Navigate to *User Settings* and generate an **OAuth2 Refresh Token** or **API Key**.
+* **Project Identification:**
+    * Retrieve the `projectID` for the codebase being migrated.
+    * *Method:* Use the UI or query the API:
+        ```http
+        GET /projects
+        ```
 
-Step A: Create a Scan Configuration
-You need to tell Checkmarx where the GitHub code lives.
+---
 
-Endpoint: POST /api/v1/projects/{id}/configuration/ssh (for SSH) or /api/v1/projects/{id}/configuration/git (for HTTPS).
+## 2. API Workflow Execution
+Follow this sequence to initialize and trigger scans programmatically.
 
-Action: Provide your GitHub Repository URL and the branch name (e.g., main or migration-dev).
+### Step A: Configure Scan Target
+Link the Checkmarx project to the GitHub repository.
 
-Step B: Trigger the Scan
-Once the project is linked to the GitHub repo, you trigger the scan.
+* **Endpoints:**
+    * SSH: `POST /api/v1/projects/{id}/configuration/ssh`
+    * HTTPS: `POST /api/v1/projects/{id}/configuration/git`
+* **Action:** Provide the GitHub Repository URL and target branch (e.g., `main`, `migration-dev`).
 
-Endpoint: POST /api/v1/scans
+### Step B: Trigger the Scan
+Initiate the SAST scan once the repository is linked.
 
-Payload:
+* **Endpoint:** `POST /api/v1/scans`
+* **Payload:**
+    ```json
+    {
+      "project": { "id": "your-project-uuid" },
+      "type": "sast",
+      "handler": { "branch": "main" }
+    }
+    ```
 
-JSON
-{
-  "project": { "id": "your-project-uuid" },
-  "type": "sast",
-  "handler": { "branch": "main" }
-}
-Step C: Monitor Scan Status
-Since scans take time, you’ll need to poll the status.
+### Step C: Monitor Status
+Scans are asynchronous. Poll the status until completion.
 
-Endpoint: GET /api/v1/scans/{scanId}
+* **Endpoint:** `GET /api/v1/scans/{scanId}`
+* **Success Criteria:** Status transitions from `Running` to `Completed`.
 
-Logic: Look for the status field to change from Running to Completed.
+---
 
-3. Handling Codebase Migration
-During a migration, you are often moving from one repository provider to another or restructuring folders. Keep these tips in mind:
+## 3. Migration Strategy (Lift & Shift)
+When moving repositories or restructuring folders, strictly adhere to this security baseline process:
 
-Baseline Scan: Run a full scan on the source code before the move. This gives you a "cleanliness" benchmark.
+1.  **Baseline Scan:** Execute a full scan on the *source* code prior to migration to establish a cleanliness benchmark.
+2.  **Incremental Validation:** Immediately post-migration, run an incremental scan to detect any misconfigurations introduced during the move.
+3.  **Remote URL Consistency:**
+    > **Note:** If using the Checkmarx GitHub Action or CLI, ensure the `CX_PROJECT_NAME` remains consistent to preserve scan history.
 
-Incremental Scans: After the migration to the new GitHub repo, run an incremental scan to ensure no security misconfigurations were introduced during the "lift and shift."
+---
 
-Update Remote URLs: If you are using the Checkmarx GitHub Action or CLI, ensure your CX_PROJECT_NAME stays consistent so that history is preserved across the migration.
+## 4. CI/CD Integration (GitHub Actions)
+For automated migrations, the Checkmarx GitHub Action is recommended over raw API calls.
 
-4. Integration via GitHub Actions (Recommended)
-While the raw API is powerful, using the Checkmarx GitHub Action is often more efficient for migrations. It wraps the API calls into a simple YAML file:
+**Implementation:**
+Create or update `.github/workflows/checkmarx.yml`:
 
-YAML
+```yaml
 - name: Checkmarx AST Scan
   uses: checkmarx/ast-github-action@main
   with:
@@ -57,7 +77,3 @@ YAML
     base_uri: ${{ secrets.CX_BASE_URI }}
     cx_client_id: ${{ secrets.CX_CLIENT_ID }}
     cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
-
-
-
-I ended the runbook here 😊
