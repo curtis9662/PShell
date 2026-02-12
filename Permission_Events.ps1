@@ -1,35 +1,47 @@
-# Define the Event IDs for local group member addition and removal
-$eventIds = @(4732, 4733)
+# Define the timeframe (30 days ago)
+$StartTime = (Get-Date).AddDays(-30)
 
-# Fetch the events from the Security log
-$events = Get-WinEvent -FilterHashtable @{
-    LogName = 'Security'
-    Id      = $eventIds
-} -ErrorAction SilentlyContinue
+# Filter for Local Security Group Member Addition (4732) and Removal (4733)
+$EventIds = @(4732, 4733)
 
-if ($null -eq $events) {
-    Write-Host "No local group membership changes found." -ForegroundColor Yellow
-    return
-}
+Write-Host "Searching Security Logs for local group changes since $($StartTime)..." -ForegroundColor Cyan
 
-# Process and display the results
-$results = $events | ForEach-Object {
-    $xml = [xml]$_.ToXml()
-    
-    # Extract specific data from the Event XML
-    $groupName = ($xml.Event.EventData.Data | Where-Object { $_.Name -eq 'TargetUserName' }).'#text'
-    
-    # Filter only for the 'Administrators' group
-    if ($groupName -eq "Administrators") {
+try {
+    # Fetch events using Get-WinEvent (faster than Get-EventLog)
+    $Events = Get-WinEvent -FilterHashtable @{
+        LogName   = 'Security'
+        Id        = $EventIds
+        StartTime = $StartTime
+    } -ErrorAction Stop
+
+    $Results = foreach ($Event in $Events) {
+        # Parse the XML data for cleaner output
+        $eventXml = [xml]$Event.ToXml()
+        
+        # Extract Data fields (Subject, Member, and Group)
+        $subjectUser = ($eventXml.Event.EventData.Data | Where-Object { $_.Name -eq "SubjectUserName" })."#text"
+        $targetGroup = ($eventXml.Event.EventData.Data | Where-Object { $_.Name -eq "TargetUserName" })."#text"
+        $memberSid   = ($eventXml.Event.EventData.Data | Where-Object { $_.Name -eq "MemberSid" })."#text"
+        
+        # Determine the action
+        $action = if ($Event.Id -eq 4732) { "Added" } else { "Removed" }
+
         [PSCustomObject]@{
-            TimeCreated  = $_.TimeCreated
-            EventID      = $_.Id
-            Action       = if ($_.Id -eq 4732) { "Member Added" } else { "Member Removed" }
-            TargetUser   = ($xml.Event.EventData.Data | Where-Object { $_.Name -eq 'MemberName' }).'#text'
-            ChangedBy    = ($xml.Event.EventData.Data | Where-Object { $_.Name -eq 'SubjectUserName' }).'#text'
-            Description  = $_.Message.Split("`r`n")[0] # Short description
+            TimeCreated  = $Event.TimeCreated
+            Action       = $action
+            TargetGroup  = $targetGroup
+            MemberSID    = $memberSid
+            PerformedBy  = $subjectUser
+            EventID      = $Event.Id
         }
     }
-}
 
-$results | Out-GridView -Title "Local Admin Changes"
+    # Display results grouped by the Target Group (e.g., Administrators)
+    $Results | Group-Object TargetGroup | ForEach-Object {
+        Write-Host "`n--- Group: $($_.Name) ---" -ForegroundColor Yellow
+        $_.Group | Sort-Object TimeCreated -Descending | Format-Table TimeCreated, Action, MemberSID, PerformedBy -AutoSize
+    }
+
+} catch {
+    Write-Warning "No events found or access denied. Ensure you are running as Administrator."
+}
