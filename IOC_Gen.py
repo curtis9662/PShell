@@ -3,8 +3,7 @@ import requests
 from datetime import datetime, timedelta
 
 # --- CONFIGURATION ---
-# Replace 'YOUR_API_KEY_HERE' with the key you generated in Step 1
-API_KEY = '8f4719e0f23c56e4023c3535d5e254049d96bede87ae48c5' 
+API_KEY = 'Input your own api key via https://urlhaus-api.abuse.ch/#auth_key' 
 
 def get_latest_iocs():
     url = "https://urlhaus-api.abuse.ch/v1/urls/recent/"
@@ -23,7 +22,7 @@ def get_latest_iocs():
     iocs = []
     expiry = (datetime.utcnow() + timedelta(days=365)).strftime('%Y-%m-%dT%H:%M:%S.0Z')
     
-    # Mapping the first 1000 items to Microsoft Defender schema
+    # Mapping the first 1000 items to Microsoft Defender schema Update # here for more than 1k
     for entry in data.get('urls', [])[:1000]:
         iocs.append({
             "indicatorType": "Url",
